@@ -11,8 +11,7 @@ func ResetGame(level *Level) *Game {
 }
 
 type event struct {
-	x      int
-	y      int
+	key    string
 	action string
 }
 
@@ -36,8 +35,15 @@ func NewGame(level *Level) *Game {
 	events := make(chan event)
 
 	g := &Game{
-		Level: level, marked: 0, menu: NewMenu(), canvas: canvas, statusElement: statusElement,
-		eventsHandler: NewEventsHandler(events), elementsHandler: NewElementsHandler(level), events: events}
+		Level:           level,
+		marked:          0,
+		menu:            NewMenu(),
+		canvas:          canvas,
+		statusElement:   statusElement,
+		eventsHandler:   NewEventsHandler(events),
+		elementsHandler: NewElementsHandler(level),
+		events:          events,
+	}
 	g.menu.HideMenu()
 	g.GenerateCanvas()
 	g.processEvents()
@@ -71,7 +77,7 @@ func (g *Game) GenerateCanvas() {
 		for j := 0; j < g.Level.Y; j++ {
 			td := document.Call("createElement", "td")
 			td.Set("innerHTML", "&nbsp;")
-			td.Set("className", "new")
+			td.Set("className", g.elementsHandler.GetElementStatus(arrayToKey(i, j)))
 			td.Set("id", arrayToKey(i, j))
 			td.Call("setAttribute", "unselectable", "on")
 
@@ -113,33 +119,38 @@ func (g *Game) processEvents() {
 			switch e.action {
 			case "left":
 				if g.markMode && g.inGame {
-					g.markBomb(e.x, e.y)
+					g.markBomb(e.key)
 				} else {
-					g.revealElement(e.x, e.y)
+					g.revealElement(e.key)
 				}
-				g.showMarked(e.x, e.y)
-				fmt.Println("Left click on", e.x, e.y)
+				g.showMarked(e.key)
+				fmt.Println("Left click on", e.key)
 			case "right":
-				g.markBomb(e.x, e.y)
-				fmt.Println("Right click on", e.x, e.y)
+				g.markBomb(e.key)
+				fmt.Println("Right click on", e.key)
 			case "both":
-				g.showMarked(e.x, e.y)
-				fmt.Println("Both click on", e.x, e.y)
+				g.showMarked(e.key)
+				fmt.Println("Both click on", e.key)
 			case "highlight":
-				fmt.Println("Highlight on", e.x, e.y)
+				fmt.Println("Highlight on", e.key)
 			}
+			g.GenerateCanvas()
 		}
 	}()
 }
 
-func (g *Game) markBomb(x, y int) {
+func (g *Game) markBomb(key string) {
+	if g.elementsHandler.MarkBomb(key) == "marked" {
+		g.marked++
+	} else {
+		g.marked--
+	}
+}
+
+func (g *Game) revealElement(key string) {
 	// TODO
 }
 
-func (g *Game) revealElement(x, y int) {
-	// TODO
-}
-
-func (g *Game) showMarked(x, y int) {
+func (g *Game) showMarked(key string) {
 	// TODO
 }

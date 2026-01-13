@@ -10,7 +10,7 @@ type Element struct {
 func NewElement() *Element {
 	return &Element{
 		isBomb:    false,
-		status:    "",
+		status:    "new",
 		modified:  false,
 		neighbors: 0,
 	}

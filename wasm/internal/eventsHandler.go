@@ -69,14 +69,12 @@ func (eh *EventsHandler) EventUp(this js.Value, args []js.Value) interface{} {
 	}
 
 	key := this.Get("id").String()
-	x, y := keyToArray(key)
 
 	eh.events <- event{
-		x:      x,
-		y:      y,
+		key:    key,
 		action: clicked,
 	}
-	
+
 	//
 	//switch clicked {
 	//case "left":
@@ -122,11 +120,8 @@ func (eh *EventsHandler) EventDown(this js.Value, args []js.Value) interface{} {
 
 	if eh.middleClick || eh.leftClick {
 		key := this.Get("id").String()
-		x, y := keyToArray(key)
-
 		eh.events <- event{
-			x:      x,
-			y:      y,
+			key:    key,
 			action: "highlight",
 		}
 	}

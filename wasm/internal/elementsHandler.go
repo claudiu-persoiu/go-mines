@@ -11,10 +11,26 @@ type ElementsHandler struct {
 }
 
 func NewElementsHandler(l *Level) *ElementsHandler {
-	return &ElementsHandler{
+	eh := &ElementsHandler{
 		elements: make(map[string]*Element),
 		level:    l,
 	}
+	eh.resetElements()
+	return eh
+}
+
+func (eh *ElementsHandler) MarkBomb(key string) string {
+	if eh.elements[key].GetStatus() == "marked" {
+		eh.elements[key].SetStatus("new")
+	} else if eh.elements[key].GetStatus() == "new" {
+		eh.elements[key].SetStatus("marked")
+	}
+
+	return eh.elements[key].GetStatus()
+}
+
+func (eh *ElementsHandler) GetElementStatus(key string) string {
+	return eh.elements[key].GetStatus()
 }
 
 func (eh *ElementsHandler) resetElements() {

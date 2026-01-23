@@ -29,8 +29,25 @@ func (eh *ElementsHandler) MarkBomb(key string) string {
 	return eh.elements[key].GetStatus()
 }
 
+func (eh *ElementsHandler) IsBomb(key string) bool {
+	return eh.elements[key].IsBomb()
+}
+
 func (eh *ElementsHandler) GetElementStatus(key string) string {
 	return eh.elements[key].GetStatus()
+}
+
+func (eh *ElementsHandler) SetStatus(key, status string) {
+	eh.elements[key].SetStatus(status)
+}
+
+func (eh *ElementsHandler) GetNeighbours(key string) int {
+	return eh.elements[key].neighbors
+}
+
+func (eh *ElementsHandler) ClearNeighbourElements(key string) {
+	x, y := keyToArray(key)
+	eh.clearNeighbors(x, y, make(map[string]bool))
 }
 
 func (eh *ElementsHandler) resetElements() {
@@ -78,6 +95,9 @@ func (eh *ElementsHandler) getNeighborBombsCount(key string) int {
 	neighborKeys := getNeighborKeys(x, y)
 
 	for _, nKey := range neighborKeys {
+		if _, exists := eh.elements[nKey]; !exists {
+			continue
+		}
 		if eh.elements[nKey].IsBomb() {
 			count++
 		}
@@ -96,4 +116,31 @@ func getNeighborKeys(x, y int) []string {
 		arrayToKey(x+1, y),
 		arrayToKey(x+1, y+1),
 	}
+}
+
+func (eh *ElementsHandler) clearNeighbors(x, y int, emptyNeighbors map[string]bool) {
+
+	if _, exists := emptyNeighbors[arrayToKey(x, y)]; exists {
+		return
+	}
+
+	emptyNeighbors[arrayToKey(x, y)] = true
+
+	keys := getNeighborKeys(x, y)
+	for _, key := range keys {
+		if _, ok := eh.elements[key]; !ok {
+			continue
+		}
+		if eh.elements[key].IsBomb() || eh.elements[key].GetStatus() == "marked" {
+			continue
+		}
+		eh.elements[key].SetStatus("empty")
+
+		if eh.elements[key].GetNeighbors() == 0 {
+			x1, y1 := keyToArray(key)
+			eh.clearNeighbors(x1, y1, emptyNeighbors)
+		}
+	}
+
+	return
 }

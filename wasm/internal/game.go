@@ -22,6 +22,7 @@ const (
 	GameNew GameStatus = iota
 	GameActive
 	GameOver
+	GameReset
 )
 
 type Game struct {
@@ -69,9 +70,10 @@ func falseFunction(this js.Value, args []js.Value) interface{} {
 	return false
 }
 
+// TODO move html generation to a different structure
 func (g *Game) GenerateCanvas() {
 	g.canvas.Set("innerHTML", "")
-	if g.status == GameOver {
+	if g.status == GameOver || g.status == GameReset {
 		g.canvas.Set("className", "translucent")
 	} else {
 		g.canvas.Set("className", "")
@@ -113,7 +115,7 @@ func (g *Game) GenerateCanvas() {
 			td.Call("setAttribute", "unselectable", "on")
 
 			td.Set("onclick", js.FuncOf(falseFunction))
-			if g.status != GameOver {
+			if g.status != GameOver && g.status != GameReset {
 				td.Set("onmousedown", js.FuncOf(g.eventsHandler.EventDown))
 				td.Set("onmouseup", js.FuncOf(g.eventsHandler.EventUp))
 			} else {
@@ -134,6 +136,11 @@ func (g *Game) GenerateCanvas() {
 
 func (g *Game) UpdateBombLabel() {
 	g.statusElement.Set("innerHTML", strconv.Itoa(g.marked)+"/"+strconv.Itoa(g.Level.Bombs))
+}
+
+func (g *Game) ToggleMarkMode() bool {
+	g.markMode = !g.markMode
+	return g.markMode
 }
 
 func arrayToKey(x, y int) string {
@@ -170,15 +177,17 @@ func (g *Game) processEvents() {
 			case "highlight":
 				fmt.Println("Highlight on", e.key)
 			}
+			g.checkFinished()
 			g.GenerateCanvas()
 		}
 	}()
 }
 
 func (g *Game) markBomb(key string) {
-	if g.elementsHandler.MarkBomb(key) == "marked" {
+	mb := g.elementsHandler.MarkBomb(key)
+	if mb == "marked" {
 		g.marked++
-	} else {
+	} else if mb == "new" {
 		g.marked--
 	}
 }
@@ -206,7 +215,10 @@ func (g *Game) revealElement(key string) {
 }
 
 func (g *Game) showMarked(key string) {
-	// TODO
+	sm := g.elementsHandler.ShowMarked(key)
+	if !sm {
+		g.gameOver()
+	}
 }
 
 func (g *Game) gameOver() {
@@ -233,6 +245,24 @@ func (g *Game) initInterval() {
 		}
 	}()
 	g.ticker = t
+}
+
+func (g *Game) checkFinished() {
+
+	if !g.elementsHandler.CheckFinished() {
+		return
+	}
+	g.ticker.Stop()
+	g.status = GameOver
+
+	g.menu.ShowMenu("You win! :)", "reset")
+}
+
+func (g *Game) Reset() {
+	g.ticker.Stop()
+	g.status = GameReset
+	g.GenerateCanvas()
+	g.menu.ShowMenu("Start fresh?", "reset")
 }
 
 func getTextColor(n int) string {

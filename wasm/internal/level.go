@@ -24,3 +24,11 @@ func GetLevelValues() *Level {
 
 	return &Level{X: x, Y: y, Bombs: bombs}
 }
+
+func SetLevelValues(level *Level) {
+	localStorage := js.Global().Get("localStorage")
+
+	localStorage.Call("setItem", "mines-x", strconv.Itoa(level.X))
+	localStorage.Call("setItem", "mines-y", strconv.Itoa(level.Y))
+	localStorage.Call("setItem", "mines-elements", strconv.Itoa(level.Bombs))
+}

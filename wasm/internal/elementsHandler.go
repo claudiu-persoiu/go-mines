@@ -105,6 +105,15 @@ func (eh *ElementsHandler) getNeighborBombsCount(key string) int {
 	return count
 }
 
+func (eh *ElementsHandler) CheckFinished() bool {
+	for _, element := range eh.elements {
+		if element.IsBomb() == false && (element.GetStatus() == "marked" || element.GetStatus() == "new") {
+			return false
+		}
+	}
+	return true
+}
+
 func getNeighborKeys(x, y int) []string {
 	return []string{
 		arrayToKey(x-1, y-1),
@@ -143,4 +152,33 @@ func (eh *ElementsHandler) clearNeighbors(x, y int, emptyNeighbors map[string]bo
 	}
 
 	return
+}
+
+func (eh *ElementsHandler) ShowMarked(key string) bool {
+	if eh.GetElementStatus(key) != "empty" || eh.GetNeighbours(key) == 0 {
+		return true
+	}
+
+	nb := eh.GetNeighbours(key)
+
+	x, y := keyToArray(key)
+	for _, neighborKey := range getNeighborKeys(x, y) {
+		if _, ok := eh.elements[neighborKey]; !ok {
+			continue
+		}
+
+		if eh.GetElementStatus(neighborKey) == "marked" {
+			if eh.IsBomb(neighborKey) {
+				nb--
+				continue
+			}
+			return false
+		}
+	}
+
+	if nb == 0 {
+		eh.ClearNeighbourElements(key)
+	}
+
+	return true
 }

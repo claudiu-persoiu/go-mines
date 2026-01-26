@@ -182,3 +182,29 @@ func (eh *ElementsHandler) ShowMarked(key string) bool {
 
 	return true
 }
+
+func (eh *ElementsHandler) Highlight(key string) {
+	x, y := keyToArray(key)
+	for _, neighborKey := range getNeighborKeys(x, y) {
+		if _, ok := eh.elements[neighborKey]; !ok {
+			continue
+		}
+		if eh.elements[neighborKey].GetStatus() == "new" {
+			eh.elements[neighborKey].SetMarked(true)
+		}
+	}
+}
+func (eh *ElementsHandler) ClearHighlight(key string) {
+	x, y := keyToArray(key)
+	for _, neighborKey := range getNeighborKeys(x, y) {
+		if _, ok := eh.elements[neighborKey]; !ok {
+			continue
+		}
+
+		eh.elements[neighborKey].SetMarked(false)
+	}
+}
+
+func (eh *ElementsHandler) IsMarked(key string) bool {
+	return eh.elements[key].IsMarked()
+}

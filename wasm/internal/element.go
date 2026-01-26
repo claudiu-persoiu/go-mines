@@ -5,6 +5,7 @@ type Element struct {
 	status    string
 	modified  bool
 	neighbors int
+	marked    bool
 }
 
 func NewElement() *Element {
@@ -13,6 +14,7 @@ func NewElement() *Element {
 		status:    "new",
 		modified:  false,
 		neighbors: 0,
+		marked:    false,
 	}
 }
 
@@ -38,6 +40,14 @@ func (e *Element) IsModified() bool {
 
 func (e *Element) SetModified(modified bool) {
 	e.modified = modified
+}
+
+func (e *Element) IsMarked() bool {
+	return e.marked
+}
+
+func (e *Element) SetMarked(marked bool) {
+	e.marked = marked
 }
 
 func (e *Element) GetNeighbors() int {

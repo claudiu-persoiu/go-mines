@@ -107,6 +107,15 @@ func main() {
 		return nil
 	}))
 
+	document.Call("querySelectorAll", ".pause-action").Call("forEach", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		option := args[0]
+		option.Set("onclick", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+			g.Pause()
+			return nil
+		}))
+		return nil
+	}))
+
 	// https://egghead.io/lessons/go-call-a-go-webassembly-function-from-javascript
 
 	<-c

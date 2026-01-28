@@ -1,0 +1,194 @@
+body {
+    background: #FAF8EF;
+    font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+    color: #776E65;
+    margin-bottom: 40px;
+}
+
+h1 {
+    padding-top: 20px;
+    font-size: 60px;
+    margin: 0;
+}
+
+a, a:active {
+    color: inherit;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#canvas {
+    min-height: 200px;
+}
+
+#canvas table {
+    border-spacing: 0px;
+    border: 0px;
+    margin: 0px;
+    padding: 0px;
+}
+
+#canvas td {
+    width: 20px;
+    height: 20px;
+    font-weight: bold;
+    text-align: center;
+    cursor: default;
+    padding: 0px;
+    margin: 0px;
+    border: 1px solid #FAF8EF;
+
+    /* disable user select */
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.container {
+    border: 0px;
+    margin: 0px;
+    padding: 0px;
+    width: 500px;
+    margin: 0 auto;
+}
+
+.new {
+    background: url("../media/sprite.jpg") 0 -42px;
+}
+
+.marked {
+    background: url("../media/sprite.jpg") 0 -21px;
+}
+
+.exploded {
+    background: url("../media/sprite.jpg") 0 0;
+}
+
+.mark-explode {
+    background: url("../media/bomb.png");
+}
+
+.mark-flag {
+    background: url("../media/flag.png");
+}
+
+#canvas.translucent {
+    opacity: 0.3;
+    filter: alpha(opacity=30);
+}
+
+#pause-image {
+    width: 25px;
+    height: 25px;
+    display: inline-block;
+    vertical-align: middle;
+    background: url("../media/button-sprite.png");
+}
+
+#pause-image.pause {
+    background-position: 0 50px;
+}
+
+#pause-image.play {
+    background-position: 0 25px;
+}
+
+#reset div {
+    background: url("../media/button-sprite.png") 0 0;
+    width: 25px;
+    height: 26px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#switch-action div {
+    width: 25px;
+    height: 26px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#canvas table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.controls {
+    text-align: center;
+}
+
+#reset-options {
+    display: none;
+}
+
+#custom-options {
+    display: none;
+}
+
+#game-status {
+    text-align: center;
+    padding: 10px 0;
+    font-weight: bold;
+    font-size: 20px;
+    background-color: #BBADA0;
+    color: #EEE4DA;
+    margin: 10px auto 20px auto;
+    border-radius: 2px;
+    display: inline-block;
+    width: 100%;
+}
+
+#game-status #counter, #game-status #status {
+    color: #FFFFFF;
+}
+
+.custom-option {
+    width: 200px;
+    margin: 0 auto;
+}
+
+.custom-option select {
+    font-size: 15px;
+}
+
+.custom-option .options {
+    float: right;
+}
+
+.custom-option .labels {
+    text-align: left !important;
+    width: 49%;
+}
+
+#overlay-help .controller {
+    float: left;
+    width: 33%;
+    text-align: center;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+#overlay-help .controller div {
+    text-align: inherit;
+    padding-top: 5px;
+}
+
+.footer {
+    text-align: center;
+    padding-top: 20px;
+    font-style: italic;
+}
+
+#fork {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
+}
+
+.ml5 {
+    margin-left: 5px;
+}

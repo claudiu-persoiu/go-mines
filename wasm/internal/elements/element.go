@@ -1,4 +1,4 @@
-package internal
+package elements
 
 type Element struct {
 	isBomb    bool

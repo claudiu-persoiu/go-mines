@@ -1,25 +1,29 @@
-package internal
+package elements
 
 import (
+	"fmt"
 	"math/rand"
 	"slices"
+	"strconv"
 )
 
-type ElementsHandler struct {
-	level    *Level
+type Handler struct {
+	x        int
+	y        int
 	elements map[string]*Element
 }
 
-func NewElementsHandler(l *Level) *ElementsHandler {
-	eh := &ElementsHandler{
+func NewElementsHandler(x, y int) *Handler {
+	eh := &Handler{
 		elements: make(map[string]*Element),
-		level:    l,
+		x:        x,
+		y:        y,
 	}
 	eh.resetElements()
 	return eh
 }
 
-func (eh *ElementsHandler) MarkBomb(key string) string {
+func (eh *Handler) MarkBomb(key string) string {
 	if eh.elements[key].GetStatus() == "marked" {
 		eh.elements[key].SetStatus("new")
 	} else if eh.elements[key].GetStatus() == "new" {
@@ -29,50 +33,50 @@ func (eh *ElementsHandler) MarkBomb(key string) string {
 	return eh.elements[key].GetStatus()
 }
 
-func (eh *ElementsHandler) IsBomb(key string) bool {
+func (eh *Handler) IsBomb(key string) bool {
 	return eh.elements[key].IsBomb()
 }
 
-func (eh *ElementsHandler) GetElementStatus(key string) string {
+func (eh *Handler) GetElementStatus(key string) string {
 	return eh.elements[key].GetStatus()
 }
 
-func (eh *ElementsHandler) SetStatus(key, status string) {
+func (eh *Handler) SetStatus(key, status string) {
 	eh.elements[key].SetStatus(status)
 }
 
-func (eh *ElementsHandler) GetNeighbours(key string) int {
+func (eh *Handler) GetNeighbours(key string) int {
 	return eh.elements[key].neighbors
 }
 
-func (eh *ElementsHandler) ClearNeighbourElements(key string) {
+func (eh *Handler) ClearNeighbourElements(key string) {
 	x, y := keyToArray(key)
 	eh.clearNeighbors(x, y, make(map[string]bool))
 }
 
-func (eh *ElementsHandler) resetElements() {
+func (eh *Handler) resetElements() {
 	eh.elements = make(map[string]*Element)
 
-	for x := 0; x < eh.level.X; x++ {
-		for y := 0; y < eh.level.Y; y++ {
-			eh.elements[arrayToKey(x, y)] = NewElement()
+	for x := 0; x < eh.x; x++ {
+		for y := 0; y < eh.y; y++ {
+			eh.elements[ArrayToKey(x, y)] = NewElement()
 		}
 	}
 }
 
-func (eh *ElementsHandler) generateElements(x, y int) {
-
+func (eh *Handler) GenerateElements(key string, bombs int) {
+	x, y := keyToArray(key)
 	excludePositions := getNeighborKeys(x, y)
 
 	var keys []string
 
-	for x := 0; x < eh.level.X; x++ {
-		for y := 0; y < eh.level.Y; y++ {
-			keys = append(keys, arrayToKey(x, y))
+	for x := 0; x < eh.x; x++ {
+		for y := 0; y < eh.y; y++ {
+			keys = append(keys, ArrayToKey(x, y))
 		}
 	}
 
-	for i := 0; i < eh.level.Bombs; i++ {
+	for i := 0; i < bombs; i++ {
 		r := rand.Intn(len(keys))
 		if slices.Contains(excludePositions, keys[r]) {
 			i--
@@ -88,7 +92,7 @@ func (eh *ElementsHandler) generateElements(x, y int) {
 
 }
 
-func (eh *ElementsHandler) getNeighborBombsCount(key string) int {
+func (eh *Handler) getNeighborBombsCount(key string) int {
 	x, y := keyToArray(key)
 	count := 0
 
@@ -105,7 +109,7 @@ func (eh *ElementsHandler) getNeighborBombsCount(key string) int {
 	return count
 }
 
-func (eh *ElementsHandler) CheckFinished() bool {
+func (eh *Handler) CheckFinished() bool {
 	for _, element := range eh.elements {
 		if element.IsBomb() == false && (element.GetStatus() == "marked" || element.GetStatus() == "new") {
 			return false
@@ -116,24 +120,24 @@ func (eh *ElementsHandler) CheckFinished() bool {
 
 func getNeighborKeys(x, y int) []string {
 	return []string{
-		arrayToKey(x-1, y-1),
-		arrayToKey(x-1, y),
-		arrayToKey(x-1, y+1),
-		arrayToKey(x, y-1),
-		arrayToKey(x, y+1),
-		arrayToKey(x+1, y-1),
-		arrayToKey(x+1, y),
-		arrayToKey(x+1, y+1),
+		ArrayToKey(x-1, y-1),
+		ArrayToKey(x-1, y),
+		ArrayToKey(x-1, y+1),
+		ArrayToKey(x, y-1),
+		ArrayToKey(x, y+1),
+		ArrayToKey(x+1, y-1),
+		ArrayToKey(x+1, y),
+		ArrayToKey(x+1, y+1),
 	}
 }
 
-func (eh *ElementsHandler) clearNeighbors(x, y int, emptyNeighbors map[string]bool) {
+func (eh *Handler) clearNeighbors(x, y int, emptyNeighbors map[string]bool) {
 
-	if _, exists := emptyNeighbors[arrayToKey(x, y)]; exists {
+	if _, exists := emptyNeighbors[ArrayToKey(x, y)]; exists {
 		return
 	}
 
-	emptyNeighbors[arrayToKey(x, y)] = true
+	emptyNeighbors[ArrayToKey(x, y)] = true
 
 	keys := getNeighborKeys(x, y)
 	for _, key := range keys {
@@ -154,7 +158,7 @@ func (eh *ElementsHandler) clearNeighbors(x, y int, emptyNeighbors map[string]bo
 	return
 }
 
-func (eh *ElementsHandler) ShowMarked(key string) bool {
+func (eh *Handler) ShowMarked(key string) bool {
 	if eh.GetElementStatus(key) != "empty" || eh.GetNeighbours(key) == 0 {
 		return true
 	}
@@ -183,7 +187,7 @@ func (eh *ElementsHandler) ShowMarked(key string) bool {
 	return true
 }
 
-func (eh *ElementsHandler) Highlight(key string) {
+func (eh *Handler) Highlight(key string) {
 	x, y := keyToArray(key)
 	for _, neighborKey := range getNeighborKeys(x, y) {
 		if _, ok := eh.elements[neighborKey]; !ok {
@@ -194,7 +198,7 @@ func (eh *ElementsHandler) Highlight(key string) {
 		}
 	}
 }
-func (eh *ElementsHandler) ClearHighlight(key string) {
+func (eh *Handler) ClearHighlight(key string) {
 	x, y := keyToArray(key)
 	for _, neighborKey := range getNeighborKeys(x, y) {
 		if _, ok := eh.elements[neighborKey]; !ok {
@@ -205,6 +209,19 @@ func (eh *ElementsHandler) ClearHighlight(key string) {
 	}
 }
 
-func (eh *ElementsHandler) IsMarked(key string) bool {
+func (eh *Handler) IsMarked(key string) bool {
 	return eh.elements[key].IsMarked()
+}
+
+func ArrayToKey(x, y int) string {
+	return strconv.Itoa(x) + "x" + strconv.Itoa(y)
+}
+
+func keyToArray(key string) (int, int) {
+	var x, y int
+	_, err := fmt.Sscanf(key, "%dx%d", &x, &y)
+	if err != nil {
+		return 0, 0
+	}
+	return x, y
 }

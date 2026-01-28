@@ -2,9 +2,11 @@ package internal
 
 import (
 	"fmt"
-	"strconv"
 	"syscall/js"
 	"time"
+
+	"github.com/claudiu-persoiu/go-mines/internal/elements"
+	"github.com/claudiu-persoiu/go-mines/internal/renderer"
 )
 
 func ResetGame(level *Level) *Game {
@@ -31,22 +33,16 @@ type Game struct {
 	Level           *Level
 	marked          int
 	menu            *Menu
-	canvas          js.Value
-	statusElement   js.Value
-	counterElement  js.Value
 	eventsHandler   *EventsHandler
-	elementsHandler *ElementsHandler
+	elementsHandler *elements.Handler
 	events          chan event
 	markMode        bool
 	ticker          *time.Ticker
 	time            int
+	renderer        *renderer.Html
 }
 
 func NewGame(level *Level) *Game {
-	document := js.Global().Get("document")
-	canvas := document.Call("getElementById", "canvas")
-	statusElement := document.Call("getElementById", "status")
-	counter := document.Call("getElementById", "counter")
 	events := make(chan event)
 
 	g := &Game{
@@ -54,13 +50,11 @@ func NewGame(level *Level) *Game {
 		Level:           level,
 		marked:          0,
 		menu:            NewMenu(),
-		canvas:          canvas,
-		statusElement:   statusElement,
-		counterElement:  counter,
 		eventsHandler:   NewEventsHandler(events),
-		elementsHandler: NewElementsHandler(level),
+		elementsHandler: elements.NewElementsHandler(level.X, level.Y),
 		events:          events,
 		time:            0,
+		renderer:        renderer.NewHtml(),
 	}
 	g.menu.HideMenu()
 	g.GenerateCanvas()
@@ -70,100 +64,25 @@ func NewGame(level *Level) *Game {
 	return g
 }
 
-func falseFunction(this js.Value, args []js.Value) interface{} {
-	return false
-}
-
-// TODO move html generation to a different structure
 func (g *Game) GenerateCanvas() {
-	g.canvas.Set("innerHTML", "")
-	if g.status == GameOver || g.status == GameReset {
-		g.canvas.Set("className", "translucent")
-	} else {
-		g.canvas.Set("className", "")
-	}
 
-	document := js.Global().Get("document")
-
-	df := document.Call("createDocumentFragment")
-	table := document.Call("createElement", "table")
-	table.Set("id", "table-elements")
-	df.Call("appendChild", table)
-
-	tbody := document.Call("createElement", "tbody")
-	table.Call("appendChild", tbody)
-
-	for i := 0; i < g.Level.X; i++ {
-		tr := document.Call("createElement", "tr")
-		tr.Set("oncontextmenu", js.FuncOf(falseFunction))
-		tr.Set("onclick", js.FuncOf(falseFunction))
-		tbody.Call("appendChild", tr)
-		for j := 0; j < g.Level.Y; j++ {
-			key := arrayToKey(i, j)
-			status := g.elementsHandler.GetElementStatus(key)
-			nb := g.elementsHandler.GetNeighbours(arrayToKey(i, j))
-
-			td := document.Call("createElement", "td")
-
-			if status == "empty" && nb > 0 {
-				td.Get("style").Set("color", getTextColor(nb))
-				td.Set("innerHTML", nb)
-			} else {
-				td.Set("innerHTML", "&nbsp;")
-			}
-			if g.status == GameOver && g.elementsHandler.IsBomb(key) {
-				td.Set("className", "exploded")
-			} else {
-				td.Set("className", g.elementsHandler.GetElementStatus(key))
-			}
-			td.Set("id", key)
-			td.Call("setAttribute", "unselectable", "on")
-
-			td.Set("onclick", js.FuncOf(falseFunction))
-			if g.status != GameOver && g.status != GameReset {
-				td.Set("onmousedown", js.FuncOf(g.eventsHandler.EventDown))
-				td.Set("onmouseup", js.FuncOf(g.eventsHandler.EventUp))
-			} else {
-				td.Set("onmousedown", js.FuncOf(falseFunction))
-				td.Set("onmouseup", js.FuncOf(falseFunction))
-			}
-
-			if g.elementsHandler.IsMarked(key) {
-				td.Get("style").Set("borderColor", "#9D9392")
-			}
-
-			td.Set("ondblclick", js.FuncOf(falseFunction))
-			td.Set("oncontextmenu", js.FuncOf(falseFunction))
-
-			tr.Call("appendChild", td)
-		}
-	}
-
-	g.canvas.Call("appendChild", df)
+	g.renderer.GenerateCanvas(
+		g.status == GameActive || g.status == GameNew,
+		g.elementsHandler,
+		g.Level.X, g.Level.Y,
+		js.FuncOf(g.eventsHandler.EventDown), js.FuncOf(g.eventsHandler.EventUp),
+	)
 
 	g.UpdateBombLabel()
 }
 
 func (g *Game) UpdateBombLabel() {
-	g.statusElement.Set("innerHTML", strconv.Itoa(g.marked)+"/"+strconv.Itoa(g.Level.Bombs))
+	g.renderer.UpdateBombLabel(g.marked, g.Level.Bombs)
 }
 
 func (g *Game) ToggleMarkMode() bool {
 	g.markMode = !g.markMode
 	return g.markMode
-}
-
-func arrayToKey(x, y int) string {
-	return strconv.Itoa(x) + "x" + strconv.Itoa(y)
-}
-
-func keyToArray(key string) (int, int) {
-	var x, y int
-	_, err := fmt.Sscanf(key, "%dx%d", &x, &y)
-	if err != nil {
-		return 0, 0
-	}
-	return x, y
 }
 
 func (g *Game) processEvents() {
@@ -212,7 +131,7 @@ func (g *Game) markBomb(key string) {
 func (g *Game) revealElement(key string) {
 	if g.status == GameNew {
 		g.status = GameActive
-		g.elementsHandler.generateElements(keyToArray(key))
+		g.elementsHandler.GenerateElements(key, g.Level.Bombs)
 		g.initInterval()
 	}
 
@@ -258,13 +177,7 @@ func (g *Game) initInterval() {
 }
 
 func (g *Game) displayTime() {
-	l := strconv.Itoa(g.time/60) + ":"
-	sec := g.time % 60
-	if sec < 10 {
-		l += "0"
-	}
-	l += strconv.Itoa(sec)
-	g.counterElement.Set("innerHTML", l)
+	g.renderer.DisplayTime(g.time)
 }
 
 func (g *Game) checkFinished() {
@@ -290,31 +203,11 @@ func (g *Game) Pause() {
 		g.status = GameActive
 		g.initInterval()
 		g.menu.PauseOff()
-		g.canvas.Get("style").Set("visibility", "visible")
+		g.renderer.UnpauseGame()
 	} else if g.status == GameActive {
 		g.status = GamePaused
 		g.ticker.Stop()
 		g.menu.PauseOn()
-		g.canvas.Get("style").Set("visibility", "hidden")
+		g.renderer.PauseGame()
 	}
-}
-
-func getTextColor(n int) string {
-	switch n {
-	case 1:
-		return "#000000"
-	case 2:
-		return "#0000FF"
-	case 3:
-		return "#00FFFF"
-	case 4:
-		return "#00FF00"
-	case 5:
-		return "#00FF00"
-	case 6:
-		return "#00FF00"
-	case 7:
-		return "#FF0000"
-	}
-	return "#000000"
 }

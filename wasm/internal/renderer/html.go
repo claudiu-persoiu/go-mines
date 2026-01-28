@@ -46,7 +46,6 @@ func (r *Html) GenerateCanvas(
 	x, y int,
 	eventDown js.Func, eventUp js.Func) {
 
-	r.canvas.Set("innerHTML", "")
 	if !inGame {
 		r.canvas.Set("className", "translucent")
 	} else {
@@ -109,6 +108,7 @@ func (r *Html) GenerateCanvas(
 		}
 	}
 
+	r.canvas.Set("innerHTML", "")
 	r.canvas.Call("appendChild", df)
 }
 

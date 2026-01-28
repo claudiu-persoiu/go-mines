@@ -66,7 +66,6 @@ func NewGame(level *Level, markMode bool) *Game {
 }
 
 func (g *Game) GenerateCanvas() {
-
 	g.renderer.GenerateCanvas(
 		g.status == GameActive || g.status == GameNew,
 		g.elementsHandler,
@@ -147,8 +146,6 @@ func (g *Game) revealElement(key string) {
 	if g.elementsHandler.GetNeighbours(key) == 0 {
 		g.elementsHandler.ClearNeighbourElements(key)
 	}
-
-	g.GenerateCanvas()
 }
 
 func (g *Game) showMarked(key string) {

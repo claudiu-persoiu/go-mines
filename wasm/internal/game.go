@@ -9,8 +9,8 @@ import (
 	"github.com/claudiu-persoiu/go-mines/internal/renderer"
 )
 
-func ResetGame(level *Level) *Game {
-	return NewGame(level)
+func ResetGame(level *Level, markMode bool) *Game {
+	return NewGame(level, markMode)
 }
 
 type event struct {
@@ -42,7 +42,7 @@ type Game struct {
 	renderer        *renderer.Html
 }
 
-func NewGame(level *Level) *Game {
+func NewGame(level *Level, markMode bool) *Game {
 	events := make(chan event)
 
 	g := &Game{
@@ -55,6 +55,7 @@ func NewGame(level *Level) *Game {
 		events:          events,
 		time:            0,
 		renderer:        renderer.NewHtml(),
+		markMode:        markMode,
 	}
 	g.menu.HideMenu()
 	g.GenerateCanvas()
@@ -90,7 +91,7 @@ func (g *Game) processEvents() {
 		for e := range g.events {
 			switch e.action {
 			case "left":
-				if g.markMode && g.status != GameOver {
+				if g.markMode && g.status != GameOver && g.status != GameNew {
 					g.markBomb(e.key)
 				} else {
 					g.revealElement(e.key)

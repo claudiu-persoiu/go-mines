@@ -116,7 +116,5 @@ func main() {
 		return nil
 	}))
 
-	// https://egghead.io/lessons/go-call-a-go-webassembly-function-from-javascript
-
 	<-c
 }

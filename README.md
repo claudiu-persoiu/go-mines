@@ -26,3 +26,6 @@ Then open your browser and navigate to `http://localhost:3000`.
 
 You can play the game directly on the following link: https://claudiu-persoiu.github.io/go-mines/
 
+### Resources
+
+https://egghead.io/courses/webassembly-with-the-go-language-3552

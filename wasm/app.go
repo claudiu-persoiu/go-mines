@@ -14,12 +14,13 @@ func main() {
 	c := make(chan struct{})
 
 	var g *internal.Game
+	markMode := false
 
 	restartFunc := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		level := internal.GetLevelValues()
 
 		if level.X > 0 && level.Y > 0 && level.Bombs > 0 {
-			g = internal.ResetGame(level)
+			g = internal.ResetGame(level, markMode)
 		}
 
 		return nil
@@ -34,8 +35,8 @@ func main() {
 	sa := document.Call("getElementById", "switch-action")
 
 	sa.Set("onclick", js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		m := g.ToggleMarkMode()
-		if m {
+		markMode = g.ToggleMarkMode()
+		if markMode {
 			sa.Call("getElementsByTagName", "div").Index(0).Set("className", "mark-flag")
 		} else {
 			sa.Call("getElementsByTagName", "div").Index(0).Set("className", "mark-explode")
@@ -68,7 +69,7 @@ func main() {
 			}
 			level := &internal.Level{X: x, Y: y, Bombs: bombs}
 			internal.SetLevelValues(level)
-			g = internal.ResetGame(level)
+			g = internal.ResetGame(level, markMode)
 
 			return nil
 		}))
@@ -97,7 +98,7 @@ func main() {
 
 		level := &internal.Level{X: x, Y: y, Bombs: bombs}
 		internal.SetLevelValues(level)
-		g = internal.ResetGame(level)
+		g = internal.ResetGame(level, markMode)
 
 		return nil
 	}))
@@ -115,8 +116,6 @@ func main() {
 		}))
 		return nil
 	}))
-
-	// https://egghead.io/lessons/go-call-a-go-webassembly-function-from-javascript
 
 	<-c
 }

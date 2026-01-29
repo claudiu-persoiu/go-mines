@@ -298,7 +298,7 @@
 </div>
 
 <script src="wasm_exec.js"></script>
-<script>
+<script defer>
     async function init() {
         const go = new Go();
         const response = await WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject);

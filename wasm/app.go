@@ -16,18 +16,18 @@ func main() {
 	var g *internal.Game
 	markMode := false
 
-	restartFunc := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	restartGame := func() {
 		level := internal.GetLevelValues()
 
 		if level.X > 0 && level.Y > 0 && level.Bombs > 0 {
 			g = internal.ResetGame(level, markMode)
 		}
+	}
 
+	restartFunc := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		restartGame()
 		return nil
 	})
-
-	window := js.Global().Get("window")
-	window.Set("onload", restartFunc)
 
 	document := js.Global().Get("document")
 	document.Call("getElementById", "new-game").Set("onclick", restartFunc)
@@ -116,6 +116,8 @@ func main() {
 		}))
 		return nil
 	}))
+
+	restartGame()
 
 	<-c
 }

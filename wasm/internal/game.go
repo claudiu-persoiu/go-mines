@@ -1,16 +1,16 @@
 package internal
 
 import (
-	"fmt"
 	"syscall/js"
 	"time"
 
 	"github.com/claudiu-persoiu/go-mines/internal/elements"
+	"github.com/claudiu-persoiu/go-mines/internal/level"
 	"github.com/claudiu-persoiu/go-mines/internal/renderer"
 )
 
-func ResetGame(level *Level, markMode bool) *Game {
-	return NewGame(level, markMode)
+func ResetGame(level *level.Level, markMode bool, elementsHandler *elements.Handler) *Game {
+	return NewGame(level, markMode, elementsHandler)
 }
 
 type event struct {
@@ -30,7 +30,7 @@ const (
 
 type Game struct {
 	status          GameStatus
-	Level           *Level
+	Level           *level.Level
 	marked          int
 	menu            *Menu
 	eventsHandler   *EventsHandler
@@ -42,7 +42,7 @@ type Game struct {
 	renderer        *renderer.Html
 }
 
-func NewGame(level *Level, markMode bool) *Game {
+func NewGame(level *level.Level, markMode bool, elementsHandler *elements.Handler) *Game {
 	events := make(chan event)
 
 	g := &Game{
@@ -51,7 +51,7 @@ func NewGame(level *Level, markMode bool) *Game {
 		marked:          0,
 		menu:            NewMenu(),
 		eventsHandler:   NewEventsHandler(events),
-		elementsHandler: elements.NewElementsHandler(level.X, level.Y),
+		elementsHandler: elementsHandler,
 		events:          events,
 		time:            0,
 		renderer:        renderer.NewHtml(),
@@ -96,21 +96,16 @@ func (g *Game) processEvents() {
 					g.revealElement(e.key)
 				}
 				g.showMarked(e.key)
-				fmt.Println("Left click on", e.key)
 			case "right":
 				g.markBomb(e.key)
-				fmt.Println("Right click on", e.key)
 			case "both":
 				g.showMarked(e.key)
-				fmt.Println("Both click on", e.key)
 			}
 
 			if e.action == "highlight" {
 				g.elementsHandler.Highlight(e.key)
-				fmt.Println("Highlight on", e.key)
 			} else {
 				g.elementsHandler.ClearHighlight(e.key)
-				fmt.Println("clear highlights", e.key)
 			}
 
 			g.checkFinished()
@@ -142,7 +137,6 @@ func (g *Game) revealElement(key string) {
 
 	g.elementsHandler.SetStatus(key, "empty")
 
-	fmt.Println(key, "neighbours:", g.elementsHandler.GetNeighbours(key))
 	if g.elementsHandler.GetNeighbours(key) == 0 {
 		g.elementsHandler.ClearNeighbourElements(key)
 	}

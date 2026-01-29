@@ -184,7 +184,9 @@ func (g *Game) checkFinished() {
 }
 
 func (g *Game) Reset() {
-	g.ticker.Stop()
+	if g.status == GameActive {
+		g.ticker.Stop()
+	}
 	g.status = GameReset
 	g.GenerateCanvas()
 	g.menu.ShowMenu("Start fresh?", "reset")

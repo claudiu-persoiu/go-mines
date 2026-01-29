@@ -13,7 +13,7 @@ type Handler struct {
 	elements map[string]*Element
 }
 
-func NewElementsHandler(x, y int) *Handler {
+func NewHandler(x, y int) *Handler {
 	eh := &Handler{
 		elements: make(map[string]*Element),
 		x:        x,

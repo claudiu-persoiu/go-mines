@@ -113,6 +113,8 @@ func (r *Html) GenerateCanvas(
 }
 
 func falseFunction(this js.Value, args []js.Value) interface{} {
+	e := args[0]
+	e.Call("preventDefault")
 	return false
 }
 

@@ -67,6 +67,7 @@ func (eh *Handler) resetElements() {
 func (eh *Handler) GenerateElements(key string, bombs int) {
 	x, y := keyToArray(key)
 	excludePositions := getNeighborKeys(x, y)
+	excludePositions = append(excludePositions, key)
 
 	var keys []string
 

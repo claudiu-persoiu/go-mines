@@ -75,18 +75,6 @@ func (eh *EventsHandler) EventUp(this js.Value, args []js.Value) interface{} {
 		action: clicked,
 	}
 
-	//
-	//switch clicked {
-	//case "left":
-	//	fmt.Println("Left click on", key)
-	//case "right":
-	//	fmt.Println("Right click on", key)
-	//case "both":
-	//	fmt.Println("Both click on", key)
-	//}
-	//
-	//// TODO clear highlights
-
 	return nil
 }
 

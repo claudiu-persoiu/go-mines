@@ -5,6 +5,9 @@ import (
 	"syscall/js"
 
 	"github.com/claudiu-persoiu/go-mines/internal"
+	"github.com/claudiu-persoiu/go-mines/internal/elements"
+	"github.com/claudiu-persoiu/go-mines/internal/level"
+	"github.com/claudiu-persoiu/go-mines/internal/renderer"
 )
 
 func main() {
@@ -17,10 +20,10 @@ func main() {
 	markMode := false
 
 	restartGame := func() {
-		level := internal.GetLevelValues()
+		l := renderer.GetLevelValues()
 
-		if level.X > 0 && level.Y > 0 && level.Bombs > 0 {
-			g = internal.ResetGame(level, markMode)
+		if l.X > 0 && l.Y > 0 && l.Bombs > 0 {
+			g = internal.ResetGame(l, markMode, elements.NewElementsHandler(l.X, l.Y))
 		}
 	}
 
@@ -67,9 +70,9 @@ func main() {
 			if e1 != nil || e2 != nil || e3 != nil {
 				return nil
 			}
-			level := &internal.Level{X: x, Y: y, Bombs: bombs}
-			internal.SetLevelValues(level)
-			g = internal.ResetGame(level, markMode)
+			l := &level.Level{X: x, Y: y, Bombs: bombs}
+			renderer.SetLevelValues(l)
+			g = internal.ResetGame(l, markMode, elements.NewElementsHandler(l.X, l.Y))
 
 			return nil
 		}))
@@ -96,9 +99,9 @@ func main() {
 			return nil
 		}
 
-		level := &internal.Level{X: x, Y: y, Bombs: bombs}
-		internal.SetLevelValues(level)
-		g = internal.ResetGame(level, markMode)
+		l := &level.Level{X: x, Y: y, Bombs: bombs}
+		renderer.SetLevelValues(l)
+		g = internal.ResetGame(l, markMode, elements.NewElementsHandler(l.X, l.Y))
 
 		return nil
 	}))

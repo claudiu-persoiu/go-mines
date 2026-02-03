@@ -74,6 +74,8 @@ func (eh *EventsHandler) EventUp(this js.Value, args []js.Value) interface{} {
 		key:    key,
 		action: clicked,
 	}
+	e.Call("preventDefault")
+	e.Call("stopPropagation")
 
 	return nil
 }
@@ -113,6 +115,8 @@ func (eh *EventsHandler) EventDown(this js.Value, args []js.Value) interface{} {
 			action: "highlight",
 		}
 	}
+	e.Call("preventDefault")
+	e.Call("stopPropagation")
 
 	return nil
 }
